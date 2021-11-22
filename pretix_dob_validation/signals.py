@@ -40,13 +40,13 @@ def navbar_info(sender, request, **kwargs):
 @receiver(
     question_form_fields_overrides, dispatch_uid="dob_validations_fields_overrides"
 )
-def form_fields_overrides(sender, request, **kwargs):
+def form_fields_overrides(sender, position, request, **kwargs):
     o = defaultdict(lambda: {"validators": []})
     for k, v in sender.settings.dob_validation_config.items():
         if k.endswith(":message") or not v:
             continue
 
-        today = now().astimezone(sender.timezone).date()
+        today = (position.subevent or sender).date_from.astimezone(sender.timezone).date()
         if k.endswith(":min"):
             max_value = date(today.year - int(v), today.month, today.day - 1 if today.day == 29 and today.month == 2 else today.day)
             o[k.split(":")[0]]["validators"].append(
