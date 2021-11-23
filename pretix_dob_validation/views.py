@@ -32,19 +32,19 @@ class DobValidationSettingsForm(forms.Form):
 
         for identifier, label in fields:
             self.fields[f"{identifier}:min"] = forms.IntegerField(
-                label=escape(_('Minimum age for "{field}"').format(field=label)),
+                label=escape(_('Minimum age for "{field}" ({identifier})').format(field=label, identifier=identifier)),
                 required=False,
                 min_value=0,
                 max_value=199,
             )
             self.fields[f"{identifier}:max"] = forms.IntegerField(
-                label=escape(_('Maximum age for "{field}"').format(field=label)),
+                label=escape(_('Maximum age for "{field}" ({identifier})').format(field=label, identifier=identifier)),
                 required=False,
                 min_value=0,
                 max_value=199,
             )
             self.fields[f"{identifier}:message"] = I18nFormField(
-                label=escape(_('Error message for "{field}"').format(field=label)),
+                label=escape(_('Error message for "{field}" ({identifier})').format(field=label, identifier=identifier)),
                 required=False,
                 locales=self.obj.settings.locales,
                 initial=LazyI18nString.from_gettext(

@@ -4,13 +4,11 @@ from datetime import date, timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.dispatch import receiver
 from django.urls import resolve, reverse
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from i18nfield.strings import LazyI18nString
 from pretix.base.settings import settings_hierarkey
 from pretix.control.signals import nav_event_settings
 from pretix.presale.signals import (
-    contact_form_fields_overrides,
     question_form_fields_overrides,
 )
 
@@ -48,14 +46,15 @@ def form_fields_overrides(sender, position, request, **kwargs):
 
         today = (position.subevent or sender).date_from.astimezone(sender.timezone).date()
         if k.endswith(":min"):
+            fname = k.split(":")[0]
             max_value = date(today.year - int(v), today.month, today.day - 1 if today.day == 29 and today.month == 2 else today.day)
-            o[k.split(":")[0]]["validators"].append(
+            o[fname]["validators"].append(
                 MaxValueValidator(
                     limit_value=max_value,
                     message=str(
                         LazyI18nString(
                             sender.settings.dob_validation_config.get(
-                                f"{k}:message",
+                                f"{fname}:message",
                                 _("You are not permitted to proceed with this age."),
                             )
                         )
@@ -63,21 +62,22 @@ def form_fields_overrides(sender, position, request, **kwargs):
                 )
             )
         if k.endswith(":max"):
+            fname = k.split(":")[0]
             min_value = date(today.year - int(v), today.month, today.day - 1 if today.day == 29 and today.month == 2 else today.day) - timedelta(days=1)
-            o[k.split(":")[0]]["validators"].append(
+            o[fname]["validators"].append(
                 MinValueValidator(
                     limit_value=min_value,
                     message=str(
                         LazyI18nString(
                             sender.settings.dob_validation_config.get(
-                                f"{k}:message",
+                                f"{fname}:message",
                                 _("You are not permitted to proceed with this age."),
                             )
                         )
                     ),
                 )
             )
-    print(o)
     return o
+
 
 settings_hierarkey.add_default("dob_validation_config", "{}", dict)
