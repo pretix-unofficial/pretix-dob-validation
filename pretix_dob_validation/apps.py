@@ -8,6 +8,7 @@ except ImportError:
 
 
 class PluginApp(PluginConfig):
+    default = True
     name = "pretix_dob_validation"
     verbose_name = "Date of Birth Validation"
 
